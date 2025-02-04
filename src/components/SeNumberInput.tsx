@@ -3,13 +3,15 @@ import React from "react";
 interface SeInputProps {
   label: string;
   value: number | string;
-  onChange: (value: number | string) => void;
+  onChange?: (value: number | string) => void;
   placeholder?: string;
   className?: string;
   disabled?: boolean;
+  readOnly?: boolean;
 }
 
-const SeNumberInput: React.FC<SeInputProps> = ({ label, value, onChange, placeholder, className, disabled = false }) => {
+const SeNumberInput: React.FC<SeInputProps> = ({ 
+  label, value, onChange = () => {}, placeholder, className, disabled = false, readOnly = false }) => {
   return (
     <div 
       className={`flex items-center justify-between border border-gray-600 rounded-md px-4 py-2 focus-within:border-white 
@@ -31,6 +33,7 @@ const SeNumberInput: React.FC<SeInputProps> = ({ label, value, onChange, placeho
         onChange={(e) => onChange(Number(e.target.value) || 0)}
         placeholder={placeholder}
         disabled={disabled}
+        readOnly={readOnly}
         className={`bg-transparent focus:outline-none text-right min-w-10
           ${disabled? 'cursor-not-allowed': ''}`}
       />

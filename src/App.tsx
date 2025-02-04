@@ -3,6 +3,7 @@ import './App.css'
 import { OrderBook } from './interfaces/dto/OrderBook'
 import OrderBookChart from './components/OrderBookChart'
 import SeNumberInput from './components/SeNumberInput'
+import PriceLineChart from './components/PriceLineChart'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -50,6 +51,14 @@ function App() {
     }
   }
 
+  const bidMarket = () => {
+    return orderBook?.bidOrders[0]?.limit ?? 0
+  }
+
+  const askMarket = () => {
+    return orderBook?.askOrders[0]?.limit ?? 0
+  }
+
   const handleCreateAccount = async () => {
     const res = await fetch(`${API_URL}/register`)
     if (!res.ok) {
@@ -88,12 +97,27 @@ function App() {
     setUnit(0)
   }
 
+  const mockPrices = [
+    { timestamp: '2023-10-01T00:00:00Z', price: 100 },
+    { timestamp: '2023-10-01T01:00:00Z', price: 101 },
+    { timestamp: '2023-10-01T02:00:00Z', price: 102 },
+    { timestamp: '2023-10-01T03:00:00Z', price: 103 },
+    { timestamp: '2023-10-01T04:00:00Z', price: 104 },
+    { timestamp: '2023-10-01T05:00:00Z', price: 105 },
+    { timestamp: '2023-10-01T06:00:00Z', price: 106 },
+    { timestamp: '2023-10-01T07:00:00Z', price: 107 },
+    { timestamp: '2023-10-01T08:00:00Z', price: 108 },
+    { timestamp: '2023-10-01T09:00:00Z', price: 109 },
+    { timestamp: '2023-10-01T10:00:00Z', price: 110 },
+  ]
+
   return (
     <>
       <div className='flex flex-row gap-8'>
         {orderBook ?
           <div className='h-96 w-[50rem]'>
             <OrderBookChart orderBook={orderBook}/>
+            <PriceLineChart prices={mockPrices}/>
           </div> :
           <h1>Loading...</h1>}
         
@@ -105,10 +129,14 @@ function App() {
               setUserId('')}}>Log out</button>
             <p className='font-bold text-2xl'>Place order</p>
             <div className='flex justtify-around w-full h-9'>
-              <div onClick={() => setIsBuy(true)} 
+              <div onClick={() => {
+                  setIsBuy(true)
+                  if (marketOrder) setLimit(askMarket())}} 
                 className={`flex-1 cursor-pointer flex items-center justify-center
                   ${isBuy ? 'bg-green-500 font-bold' : 'bg-[#333333] text-gray-500'}`}>BUY</div>
-              <div onClick={() => setIsBuy(false)} 
+              <div onClick={() => {
+                  setIsBuy(false)
+                  if (marketOrder) setLimit(bidMarket())}} 
                 className={`flex-1 cursor-pointer flex items-center justify-center
                   ${isBuy ? 'bg-[#333333] text-gray-500' : 'bg-red-500 font-bold'}`}>SELL</div>
             </div>
@@ -121,7 +149,7 @@ function App() {
                 }`}
                 onClick={() => {
                   setMarketOrder(true)
-                  setLimit('At market')}}
+                  setLimit(isBuy? askMarket() : bidMarket())}}
               >
                 Market
               </div>
@@ -136,6 +164,10 @@ function App() {
                 Limit
               </div>
             </div>
+            <div>
+              <p className='font-bold'><span className='text-green-500'>Bid ${bidMarket()}</span> / 
+              <span className='text-red-500'>Ask ${askMarket()}</span></p>
+            </div>
             <SeNumberInput 
               label="($) Price"
               value={limit}
@@ -147,6 +179,12 @@ function App() {
               value={unit}
               onChange={setUnit}
               className='w-full'/>
+            <hr className='w-full'/>
+            <SeNumberInput
+              label='($) Amount'
+              value={(Number(limit) * Number(unit))}
+              className='w-full'
+              readOnly={true}/>
             <button onClick={placeOrder} className='w-full'>Place order</button>
           </div> :
           <div className='flex flex-col gap-3'>
