@@ -4,6 +4,7 @@ import { OrderBook } from './interfaces/dto/OrderBook'
 import OrderBookChart from './components/OrderBookChart'
 import SeNumberInput from './components/SeNumberInput'
 import PriceLineChart from './components/PriceLineChart'
+import { Price } from './interfaces/dto/Price'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -12,27 +13,42 @@ function App() {
   const [userId, setUserId] = useState<string>('')
   const [error, setError] = useState<string>('')
   const [orderBook, setOrderBook] = useState<OrderBook | null>(null)
+  const [prices, setPrices] = useState<Price[]>([])
   const [isBuy, setIsBuy] = useState<boolean>(true)
   const [marketOrder, setMarketOrder] = useState<boolean>(false)
   const [limit, setLimit] = useState<number | string>(0)
   const [unit, setUnit] = useState<number | string>(0)
 
   useEffect(() => {
-    const eventSource = new EventSource(`${API_URL}/order-book/stream`)
+    const orderBookSteam = new EventSource(`${API_URL}/order-book/stream`)
+    const priceSteam = new EventSource(`${API_URL}/order-book/price-history`)
 
-    eventSource.onmessage = (event) => {
+    orderBookSteam.onmessage = (event) => {
       const data : OrderBook = JSON.parse(event.data)
       setOrderBook(data)
     }
 
-    eventSource.onerror = (event) => {
+    priceSteam.onmessage = (event) => {
+      const data : Price[] = JSON.parse(event.data)
+      console.log(data)
+      setPrices(data)
+    }
+
+    orderBookSteam.onerror = (event) => {
       setOrderBook(null)
       console.error(event)
-      eventSource.close()
+      orderBookSteam.close()
+    }
+
+    priceSteam.onerror = (event) => {
+      setPrices([])
+      console.error(event)
+      priceSteam.close()
     }
 
     return () => {
-      eventSource.close()
+      orderBookSteam.close()
+      priceSteam.close()
     }
   }, [])
 
@@ -97,27 +113,13 @@ function App() {
     setUnit(0)
   }
 
-  const mockPrices = [
-    { timestamp: '2023-10-01T00:00:00Z', price: 100 },
-    { timestamp: '2023-10-01T01:00:00Z', price: 101 },
-    { timestamp: '2023-10-01T02:00:00Z', price: 102 },
-    { timestamp: '2023-10-01T03:00:00Z', price: 103 },
-    { timestamp: '2023-10-01T04:00:00Z', price: 104 },
-    { timestamp: '2023-10-01T05:00:00Z', price: 105 },
-    { timestamp: '2023-10-01T06:00:00Z', price: 106 },
-    { timestamp: '2023-10-01T07:00:00Z', price: 107 },
-    { timestamp: '2023-10-01T08:00:00Z', price: 108 },
-    { timestamp: '2023-10-01T09:00:00Z', price: 109 },
-    { timestamp: '2023-10-01T10:00:00Z', price: 110 },
-  ]
-
   return (
     <>
       <div className='flex flex-row gap-8'>
         {orderBook ?
           <div className='h-96 w-[50rem]'>
             <OrderBookChart orderBook={orderBook}/>
-            <PriceLineChart prices={mockPrices}/>
+            <PriceLineChart prices={prices}/>
           </div> :
           <h1>Loading...</h1>}
         
