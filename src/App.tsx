@@ -120,6 +120,7 @@ function App() {
           <div className='h-96 w-[50rem]'>
             <OrderBookChart orderBook={orderBook}/>
             <PriceLineChart prices={prices}/>
+            <p>{(new Date(Number(String(prices[0].Timestamp)) * 1000)).toLocaleTimeString()} from {prices[0].Timestamp}</p>
           </div> :
           <h1>Loading...</h1>}
         

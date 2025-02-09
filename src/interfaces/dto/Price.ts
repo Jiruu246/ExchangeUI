@@ -1,7 +1,7 @@
 export interface Price {
-    timestamp: number;
-    open: number;
-    high: number;
-    low: number;
-    close: number;
+    Timestamp: number;
+    Open: number;
+    High: number;
+    Low: number;
+    Close: number;
 }
