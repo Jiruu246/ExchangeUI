@@ -14,6 +14,7 @@ import {
 import { Line } from 'react-chartjs-2';
 import { Price } from '../interfaces/dto/Price';
 import 'chartjs-adapter-date-fns';
+import { color } from 'chart.js/helpers';
 
 ChartJS.register(
   TimeScale,
@@ -25,7 +26,7 @@ ChartJS.register(
   Legend
 );
 
-export const options = {
+export const baseOptions = {
   responsive: true,
   plugins: {
     legend: {
@@ -38,18 +39,27 @@ export const options = {
   },
   scales: {
     x: {
+      grid: {
+        color: 'rgb(245,245,245)',
+      },
       type : 'time' as const,
       ticks: {
         source: 'data' as const,
         callback: (value: any) => 
-          new Date(roundToMinute(Number(value)) * 1000).toLocaleTimeString([], {
+          new Date(Number(value) * 1000).toLocaleTimeString([], {
             hour: '2-digit',
             minute: '2-digit',
             hour12: false,
           }),
-        // autoSkip: true,
       }
-    }
+    },
+    y: {
+      grid: {
+        color: 'rgb(245,245,245)',
+      },
+      suggestedMin: 0,
+      suggestedMax: 0,
+    },
   }
 };
 
@@ -63,7 +73,7 @@ const roundToMinute= (timestamp: number): number => {
 
 const PriceLineChart: React.FC<PriceLineChartProps> = ({prices}) => {
     const data = {
-        labels: prices.map(price => price.Timestamp),
+        labels: prices.map(price => roundToMinute(price.Timestamp)),
         datasets: [
             {
                 label: 'Price',
@@ -75,7 +85,15 @@ const PriceLineChart: React.FC<PriceLineChartProps> = ({prices}) => {
         ],
     };
 
-    return <Line options={options} data={data} />;
+    const minPrice = Math.min(...prices.map(price => price.Close));
+    const maxPrice = Math.max(...prices.map(price => price.Close));
+
+    baseOptions.scales.y = {
+        suggestedMin: minPrice * 0.9, // 10% margin below
+        suggestedMax: maxPrice * 1.1, // 10% margin above
+    };
+
+    return <Line options={baseOptions} data={data} />;
 }
 
 export default PriceLineChart;
