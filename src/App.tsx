@@ -59,7 +59,7 @@ function App() {
       return
     }
     const data = await res.json()
-    if (data.exists) {
+    if (data.userExists) {
       setLoggedIn(true)
       setError('')
     } else {
@@ -68,11 +68,11 @@ function App() {
   }
 
   const bidMarket = () => {
-    return orderBook?.bidOrders[0]?.limit ?? 0
+    return orderBook?.bidOrders[0]?.price ?? 0
   }
 
   const askMarket = () => {
-    return orderBook?.askOrders[0]?.limit ?? 0
+    return orderBook?.askOrders[0]?.price ?? 0
   }
 
   const handleCreateAccount = async () => {
@@ -95,11 +95,10 @@ function App() {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        userId,
+        isBuy,
         unit,
-        limit,
-        buy: isBuy,
-        marketOrder
+        limit: marketOrder ? 0 : limit,
+        userId
       })
     })
     
@@ -120,7 +119,6 @@ function App() {
           <div className='h-96 w-[50rem]'>
             <OrderBookChart orderBook={orderBook}/>
             <PriceLineChart prices={prices}/>
-            <p>{(new Date(Number(String(prices[0].Timestamp)) * 1000)).toLocaleTimeString()} from {prices[0].Timestamp}</p>
           </div> :
           <h1>Loading...</h1>}
         
