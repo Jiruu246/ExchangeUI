@@ -10,14 +10,14 @@ interface OrderBookChartProps {
 }
 
 const OrderBookChart: React.FC<OrderBookChartProps> = ({orderBook}) => {
-    const bidOrders = [...orderBook.bidOrders].sort((a, b) => a.limit - b.limit);
-    const askOrders = [...orderBook.askOrders].sort((a, b) => a.limit - b.limit);
+    const bidOrders = [...orderBook.bidOrders].sort((a, b) => a.price - b.price);
+    const askOrders = [...orderBook.askOrders].sort((a, b) => a.price - b.price);
 
-    const bidPrices = bidOrders.map(order => order.limit.toFixed(2));
-    const bidAmounts = bidOrders.map(order => order.volume);
+    const bidPrices = bidOrders.map(order => order.price.toFixed(2));
+    const bidAmounts = bidOrders.map(order => order.quantity);
 
-    const askPrices = askOrders.map(order => order.limit.toFixed(2));
-    const askAmounts = askOrders.map(order => order.volume);
+    const askPrices = askOrders.map(order => order.price.toFixed(2));
+    const askAmounts = askOrders.map(order => order.quantity);
 
     const data = {
         labels: [...bidPrices, ...askPrices],
